@@ -83,12 +83,16 @@
   IAAdRequest *request;
   // Bidding flow only for native ads
   request = GADMAdapterFyberBuildRequestWithAdConfiguration(_adConfiguration);
-
+  NSString *spotID = _adConfiguration.credentials.settings[GADMAdapterFyberSpotID];
+    
   IASDKCore.sharedInstance.mediationType = [[IAMediationAdMob alloc] init];
     
   _nativeAdSpot = [IANativeAdSpot build:^(id<IANativeAdSpotBuilder> _Nonnull builder) {
       builder.adRequest = request;
       builder.delegate = self;
+      if (spotID.length) {
+          builder.userInfo = @{@"DTSpotID": spotID};
+      }
   }];
 
   [_nativeAdSpot loadAdWithMarkup:bidResponse withCompletion:^(IANativeAdAssets *nativeAdAssets, NSError *error) {
@@ -277,6 +281,10 @@
     [_delegate willPresentFullScreenView];
 }
 
+- (void)iaNativeAdDidPresentFullscreen:(IANativeAdSpot *)adSpot {
+    NSLog(@"iaNativeAdDidPresentFullscreen, unitID: %@, spotID %@", adSpot.adRequest.unitID, adSpot.userInfo[@"DTSpotID"]);
+}
+
 - (void)iaNativeAdWillDismissFullscreen:(IANativeAdSpot *)adSpot {
     [_delegate willDismissFullScreenView];
 }
@@ -287,6 +295,38 @@
 
 - (void)iaNativeAdWillOpenExternalApp:(IANativeAdSpot *)adSpot {
     // Google Mobile Ads SDK doesn't have a matching event.
+}
+
+- (void)iaNativeAdDidExpire:(IANativeAdSpot *)adSpot {
+    // as of DT Exchange SDK v8.4.0, "iaAdDidExpire" callback is triggered only from IAFullscreenUnitController
+    NSLog(@"iaNativeAdDidExpire, unitID: %@, spotID %@", adSpot.adRequest.unitID, adSpot.userInfo[@"DTSpotID"]);
+}
+
+// native video callbacks
+- (void)iaNativeAd:(IANativeAdSpot *)adSpot videoDurationUpdated:(NSTimeInterval)videoDuration {
+    NSLog(@"iaNativeAd:videoDurationUpdated:, duration is %.2f, for unitID: %@, spotID %@", videoDuration, adSpot.adRequest.unitID, adSpot.userInfo[@"DTSpotID"]);
+}
+
+- (void)iaNativeAd:(IANativeAdSpot *)adSpot videoInterruptedWithError:(NSError *)error {
+    NSLog(@"iaNativeAd:videoInterruptedWithError: %@, for unitID: %@, spotID %@", error, adSpot.adRequest.unitID, adSpot.userInfo[@"DTSpotID"]);
+}
+
+- (void)iaNativeAd:(IANativeAdSpot *)adSpot videoProgressUpdatedWithCurrentTime:(NSTimeInterval)currentTime totalTime:(NSTimeInterval)totalTime {
+    // this callback is triggered very often, enable only if needed
+    //NSLog(@"iaNativeAd:videoProgressUpdatedWithCurrentTime: %.2f totalTime: %.2f, for unitID: %@, spotID %@", currentTime, totalTime, adSpot.adRequest.unitID, adSpot.userInfo[@"DTSpotID"]);
+}
+
+- (void)iaNativeAdVideoCompleted:(IANativeAdSpot *)adSpot {
+    [_delegate didEndVideo];
+}
+
+// native image callbacks
+- (void)iaNativeAdSpot:(IANativeAdSpot *)adSpot didFailToLoadImageFromUrl:(NSURL *)url with:(NSError *)error {
+    NSLog(@"iaNativeAdSpot:didFailToLoadImageFromUrl: %@, with error: %@, for unitID: %@, spotID %@", url.absoluteString, error, adSpot.adRequest.unitID, adSpot.userInfo[@"DTSpotID"]);
+}
+
+-(void)iaNativeAd:(IANativeAdSpot *)adSpot didLoadImageFromUrl:(NSURL *)url {
+    NSLog(@"iaNativeAd:didLoadImageFromUrl %@,  spotID %@", url, adSpot.userInfo[@"DTSpotID"]);
 }
 
 @end
