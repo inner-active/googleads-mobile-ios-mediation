@@ -7,7 +7,7 @@
 #import "GADMAdapterFyberConstants.h"
 #import "GADMAdapterFyberUtils.h"
 
-@interface GADMAdapterFyberNativeAd () <GADMediationNativeAd, IANativeAdDelegate>
+@interface GADMAdapterFyberNativeAd () <IANativeAdDelegate>
 @end
 
 @implementation GADMAdapterFyberNativeAd {
@@ -154,7 +154,11 @@
 
 - (GADNativeAdImage *)icon {
     UIImageView *iconImageView = (UIImageView *)_nativeAdAssets.appIcon;
-    return [GADNativeAdImage.alloc initWithImage:iconImageView.image];
+    if (iconImageView.image) {
+        return [GADNativeAdImage.alloc initWithImage:iconImageView.image];
+    }
+    
+    return nil;
 }
 
 - (NSString *)callToAction {
@@ -165,6 +169,7 @@
     return _nativeAdAssets.rating ? [NSDecimalNumber decimalNumberWithDecimal:_nativeAdAssets.rating.decimalValue] : nil;
 }
 
+//TODO: can contain image or video, verify with Google(?)
 - (UIView *)mediaView {
     return _nativeAdAssets.mediaView;
 }
@@ -204,41 +209,18 @@
 
 - (void)didRenderInView:(UIView *)view clickableAssetViews:(NSDictionary<GADNativeAssetIdentifier,UIView *> *)clickableAssetViews nonclickableAssetViews:(NSDictionary<GADNativeAssetIdentifier,UIView *> *)nonclickableAssetViews viewController:(UIViewController *)viewController {
     
-    // TODO: nonclickableAssetViews is relevant for us?
+    // TODO: 'nonclickableAssetViews' is relevant for us?
     
-    static const NSInteger ViewTagTitle = 1;
     static const NSInteger ViewTagMediaView = 2;
     static const NSInteger ViewTagIcon = 4;
-    static const NSInteger ViewTagDescription = 5;
-    static const NSInteger ViewTagRating = 6;
-    static const NSInteger ViewTagCta = 7;
     
     __block UIView *mediaView = nil;
     __block UIView *iconView = nil;
     NSMutableArray<UIView *> *otherClickableViews = NSMutableArray.array;
     
-    // Map GADNativeAssetIdentifier -> ViewTag
-    NSDictionary<GADNativeAssetIdentifier, NSNumber *> *assetToTagMap = @{
-        GADNativeHeadlineAsset: @(ViewTagTitle),
-        GADNativeCallToActionAsset: @(ViewTagCta),
-        GADNativeIconAsset: @(ViewTagIcon),
-        GADNativeBodyAsset: @(ViewTagDescription),
-        GADNativeStarRatingAsset: @(ViewTagRating),
-//        GADNativeImageAsset: @(ViewTagMediaView), // TODO: needed for image too?
-        GADNativeMediaViewAsset: @(ViewTagMediaView)
-    };
-
-    
-    // Enumerate clickableAssetViews
     [clickableAssetViews enumerateKeysAndObjectsUsingBlock:^(GADNativeAssetIdentifier assetIdentifier, UIView *assetView, BOOL *stop) {
-        NSNumber *tagNumber = assetToTagMap[assetIdentifier];
         
-        if (tagNumber) {
-            assetView.tag = tagNumber.integerValue;
-            [otherClickableViews addObject:assetView];
-        }
-        
-        switch (tagNumber.intValue) {
+        switch (assetView.tag) {
             case ViewTagMediaView:
                 mediaView = assetView;
                 break;
@@ -246,10 +228,9 @@
                 iconView = assetView;
                 break;
             default:
-                break;
+                [otherClickableViews addObject:assetView];
         }
     }];
-
     
     [_nativeAdAssets registerViewForInteraction:view
                                           mediaView:mediaView
@@ -258,7 +239,11 @@
 }
 
 - (void)didRecordImpression {
-    
+    //TODO: is needed?
+}
+
+-(void)didRecordClickOnAssetWithName:(GADNativeAssetIdentifier)assetName view:(UIView *)view viewController:(UIViewController *)viewController {
+    //TODO: is needed?
 }
 
 #pragma mark - IANativeAdDelegate
@@ -330,4 +315,3 @@
 }
 
 @end
-
