@@ -118,15 +118,13 @@
 
 #pragma mark - GADMediationNativeAd
 
-// TODO: is needed?
+- (BOOL)handlesUserClicks {
+    return YES;
+}
 
-//- (BOOL)handlesUserClicks {
-//    return YES;
-//}
-//
-//- (BOOL)handlesUserImpressions {
-//    return YES;
-//}
+- (BOOL)handlesUserImpressions {
+    return YES;
+}
 
 #pragma mark - GADMediatedUnifiedNativeAd
 
@@ -238,17 +236,7 @@
                                      clickableViews:otherClickableViews];
 }
 
-- (void)didRecordImpression {
-    //TODO: is needed?
-}
-
--(void)didRecordClickOnAssetWithName:(GADNativeAssetIdentifier)assetName view:(UIView *)view viewController:(UIViewController *)viewController {
-    //TODO: is needed?
-}
-
 #pragma mark - IANativeAdDelegate
-
-//TODO: are more callbacks needed?
 
 - (UIViewController *)iaParentViewControllerForAdSpot:(IANativeAdSpot *)adSpot {
     return _adConfiguration.topViewController;
