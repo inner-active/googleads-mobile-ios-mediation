@@ -100,7 +100,7 @@
         
         if (!error) {
             strongSelf->_nativeAdAssets = nativeAdAssets;
-            strongSelf->_loadCompletionHandler(self, nil);
+            strongSelf->_delegate = strongSelf->_loadCompletionHandler(strongSelf, nil);
         } else {
             if (error) {
                 GADMAdapterFyberLog("Failed to initialize DT Exchange SDK: %@",
@@ -237,8 +237,6 @@
 }
 
 #pragma mark - IANativeAdDelegate
-
-// Note: AdMob delegate callbacks were not called in our tests
 
 - (UIViewController *)iaParentViewControllerForAdSpot:(IANativeAdSpot *)adSpot {
     return _adConfiguration.topViewController;
