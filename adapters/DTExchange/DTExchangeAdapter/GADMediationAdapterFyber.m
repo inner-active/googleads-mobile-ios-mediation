@@ -32,7 +32,7 @@
   /// DT Exchange rewarded ad wrapper.
   GADMAdapterFyberRewardedAd *_rewardedAd;
     
-  /// DT Exchange rewarded ad wrapper.
+  /// DT Exchange native ad wrapper.
   GADMAdapterFyberNativeAd *_nativeAd;
 }
 
